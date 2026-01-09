@@ -2,11 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const sequelize = require("./config/database");
 const authRoute = require("./routes/auth/index.js");
+const cookieParser = require("cookie-parser");
 const app = express();
 
 app.use(express.json());
-app.use(express.urlencoded({extend:true}));
-app.use(require('./middleware/error.middleware'));
+app.use(express.urlencoded({ extend: true }));
+app.use(cookieParser());
 
 sequelize
   .authenticate()
@@ -18,5 +19,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoute);
+app.use(require("./middleware/error.middleware"));
 
 app.listen(3000, () => console.log("Server Running"));

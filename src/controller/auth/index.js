@@ -1,6 +1,24 @@
-const { createUser, loginUser } = require("../../services/user");
-const signupController = async (req, res) => {
+const {
+  createUser,
+  loginUser,
+  getUserByEmail,
+} = require("../../services/user");
+
+const { verifyPassword, generateJWTToken } = require("../../utils/auth");
+const httpError = require("../../utils/httpError");
+
+const signupController = async (req, res, next) => {
   const { name, email, password, type } = req.body;
+  if (!email || !password || !name) {
+    return next(httpError("Name ,email and password are required", 400));
+  }
+
+  const existingUser = await getUserByEmail(email);
+
+  if (existingUser) {
+    return next(httpError("User with email already exist", 400));
+  }
+
   const user = await createUser({ name, email, password, type });
   res.status(200).json({
     sucess: true,
@@ -9,12 +27,33 @@ const signupController = async (req, res) => {
   });
 };
 
-const loginController = async (req, res) => {
+const loginController = async (req, res, next) => {
   const { email, password } = req.body;
-  const user = await loginUser({ email, password });
+
+  if (!email || !password) {
+    return next(httpError("Email and password are required", 400));
+  }
+
+  const user = await getUserByEmail(email);
+  if (!user) {
+    return next(httpError("User not found", 404));
+  }
+
+  const passwordMatched = await verifyPassword(password, user.password);
+  if (!passwordMatched) {
+    return next(httpError("Invaid password", 400));
+  }
+
+  const jwtToken = generateJWTToken(user);
+  res.cookie("token", jwtToken, {
+    httpOnly: true,
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000, //1 day
+    sameSite: "strict",
+  });
   res
     .status(200)
-    .json({ sucess: true, message: "User logged in", data: { email } });
+    .json({ sucess: true, message: "User logged in", data: jwtToken });
 };
 
 module.exports = { signupController, loginController };

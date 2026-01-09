@@ -1,16 +1,32 @@
 const User = require("../../model/user");
 const bcrypt = require("bcryptjs");
+const { encryptPassword } = require("../../utils/auth");
+
 const createUser = async (userData) => {
   try {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(userData.password, salt);
-    userData.password = hashedPassword;
-    const user = (await User.create(userData)).toJSON();
+    const user = (
+      await User.create({
+        ...userData,
+        password: await encryptPassword(userData.password),
+      })
+    ).toJSON();
     const { password, ...userWithoutPassword } = user;
-
     return userWithoutPassword;
   } catch (error) {
-    console.log("Error", error);
+    console.log("Create error  failed", error);
+    throw error;
+  }
+};
+
+const getUserByEmail = async (email) => {
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return null;
+    }
+    return user;
+  } catch (error) {
+    console.error("Erro fetching user by email", error);
   }
 };
 
@@ -18,7 +34,6 @@ const loginUser = async (email, password) => {
   try {
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      
       throw new Error("User not found");
     }
 
@@ -40,4 +55,5 @@ const loginUser = async (email, password) => {
 module.exports = {
   createUser,
   loginUser,
+  getUserByEmail,
 };
