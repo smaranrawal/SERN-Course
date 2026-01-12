@@ -25,4 +25,17 @@ const generateJWTToken = (user) => {
   return token;
 };
 
-module.exports = { encryptPassword, verifyPassword, generateJWTToken };
+const verifyToken = (token) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded;
+  } catch (error) {
+    return null;
+  }
+};
+module.exports = {
+  encryptPassword,
+  verifyPassword,
+  generateJWTToken,
+  verifyToken,
+};

@@ -4,6 +4,7 @@ const sequelize = require("./config/database");
 const authRoute = require("./routes/auth/index.js");
 const cookieParser = require("cookie-parser");
 const app = express();
+const { isProtectedRoute,isVendor } = require("./middleware/auth.js");
 
 app.use(express.json());
 app.use(express.urlencoded({ extend: true }));
@@ -19,6 +20,12 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoute);
-app.use(require("./middleware/error.middleware"));
 
+app.use(isProtectedRoute);
+app.use('/vendor',isVendor,require('./routes/vendor'))
+app.get("/test", (req, res) => {
+  console.log("Usser Data", req.user);
+  res.send("Test Route");
+});
+app.use(require("./middleware/error.middleware"));
 app.listen(3000, () => console.log("Server Running"));
