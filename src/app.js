@@ -2,9 +2,19 @@ require("dotenv").config();
 const express = require("express");
 const sequelize = require("./config/database");
 const authRoute = require("./routes/auth/index.js");
+const vendorRoute = require("./routes/vendor");
+
 const cookieParser = require("cookie-parser");
 const app = express();
-const { isProtectedRoute,isVendor } = require("./middleware/auth.js");
+const {
+  isProtectedRoute,
+  isVendor,
+  isCustomer,
+} = require("./middleware/auth.js");
+const {
+  getProductsController,
+  getCustomerProductByIdController,
+} = require("./controller/products/index.js");
 
 app.use(express.json());
 app.use(express.urlencoded({ extend: true }));
@@ -20,12 +30,15 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoute);
+app.use("/products", getProductsController); //for customers
+app.use("/product/:productId", getCustomerProductByIdController); //for sutomer by id
 
 app.use(isProtectedRoute);
-app.use('/vendor',isVendor,require('./routes/vendor'))
+app.use("/vendor", isVendor, vendorRoute);
 app.get("/test", (req, res) => {
   console.log("Usser Data", req.user);
   res.send("Test Route");
 });
+// app.use("/cart", isCustomer, cartRoute);
 app.use(require("./middleware/error.middleware"));
 app.listen(3000, () => console.log("Server Running"));

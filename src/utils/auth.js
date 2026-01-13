@@ -10,6 +10,7 @@ const encryptPassword = async (password) => {
 const verifyPassword = async (inputPassword, storedHashedPassowrd) => {
   return await bcrypt.compare(inputPassword, storedHashedPassowrd);
 };
+
 const generateJWTToken = (user) => {
   const token = jwt.sign(
     {
