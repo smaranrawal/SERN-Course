@@ -3,7 +3,7 @@ const express = require("express");
 const sequelize = require("./config/database");
 const authRoute = require("./routes/auth/index.js");
 const vendorRoute = require("./routes/vendor");
-
+const cartRoute=require('./routes/cart')
 const cookieParser = require("cookie-parser");
 const app = express();
 const {
@@ -39,6 +39,6 @@ app.get("/test", (req, res) => {
   console.log("Usser Data", req.user);
   res.send("Test Route");
 });
-// app.use("/cart", isCustomer, cartRoute);
+app.use("/cart", isCustomer, cartRoute);
 app.use(require("./middleware/error.middleware"));
 app.listen(3000, () => console.log("Server Running"));
