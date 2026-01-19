@@ -51,9 +51,16 @@ const loginController = async (req, res, next) => {
     maxAge: 24 * 60 * 60 * 1000, //1 day
     sameSite: "strict",
   });
-  res
-    .status(200)
-    .json({ sucess: true, message: "User logged in", data: jwtToken });
+  res.status(200).json({
+    success: true,
+    message: "User logged in",
+    data: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      type: user.type,
+    },
+  });
 };
 
 module.exports = { signupController, loginController };
